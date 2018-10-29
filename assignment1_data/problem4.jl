@@ -123,5 +123,5 @@ end
 #= We decided to reduce the threshold in order to gain more important image edges.
 Threshold = 10 is an acceptable choice that detects much details, even the edges
 reflected on the lake surface.
-A smaller threshold yields more details, but most os them are noise and unnecessary.
+A smaller threshold yields more details, but most of them are noise and unnecessary.
 =#
