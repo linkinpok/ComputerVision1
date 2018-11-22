@@ -65,7 +65,7 @@ function displaypyramid(P::Array{Array{Float64,2},1})
     display = hcat(display,Pi)
   end
   figure()
-  imshow(display)
+  imshow(display,"gray")
   return gcf()
 end
 
