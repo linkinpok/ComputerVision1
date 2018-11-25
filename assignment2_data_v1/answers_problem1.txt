@@ -1,0 +1,9 @@
+1.7.
+    There is no difference between the top level of Gaussian and Laplacian pyramids,
+    because the difference gets smaller along the upper levels and can be approximated
+    to be zero at the highest level.
+
+1.8.
+    A good sharpened image can be reconstructed by scaling up the finest two levels
+    of the Laplacian pyramid both by factor 1.5, which is great enough to gain
+    a good sharpeness but not to amplify much noise.

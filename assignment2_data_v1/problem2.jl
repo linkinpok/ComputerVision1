@@ -46,7 +46,7 @@ function computepca(data::Array{Float64,2})
   # calculate mean face
   mu = reshape(E,96,84)
   # calculate cumulative variance vector
-  # note: the variance of eigenvectors of a covariance matrix equal to its eigenvalues
+  # the variance of eigenvectors of a covariance matrix equal to its eigenvalues
   # source: https://de.mathworks.com/matlabcentral/fileexchange/26791-cumulative-mean-and-variance
   cumvar = [sum(lambda[1:i]) for i in 1:length(lambda)] / length(lambda)
   return U::Array{Float64,2},lambda::Array{Float64,1},mu::Array{Float64,2},cumvar::Array{Float64,1}
@@ -74,11 +74,12 @@ end
 # Display the mean face and the first 10 Eigenfaces in a single figure
 function showeigenfaces(U::Array{Float64,2},mu::Array{Float64,2},facedim::Array{Int})
   figure()
-  subplot(4,3,1), imshow(mu,"gray"), title("Mean Face")
+  subplot(4,3,1), imshow(mu,"gray"), title("Mean Face"), axis("off")
   for i in 1:10
     subplot(4,3,i+2)
     imshow(reshape(U[:,i],facedim[1],facedim[2]),"gray")
     title(string("Eigenface ",i))
+    axis("off")
   end
   return nothing::Nothing
 end
@@ -108,8 +109,9 @@ function showreconstructedfaces(faceim, f5, f15, f50, f150)
     subplot(3,2,i)
     imshow(faces[i],"gray")
     title(string("Reconstruction ",i))
+    axis("off")
   end
-  subplot(3,2,5), imshow(faceim,"gray"), title("Original")
+  subplot(3,2,5), imshow(faceim,"gray"), title("Original"), axis("off")
   return nothing::Nothing
 end
 

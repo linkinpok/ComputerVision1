@@ -1,0 +1,5 @@
+2.3.
+    The variance of a single eigenvectors of a covariance matrix equal to
+    its eigenvalues.
+    Source: https://www.scss.tcd.ie/~houldinb/ST3011_files/ST3011slides4.pdf
+    Var(u'X) = u'Σu = u'λu = λu'u = λ
