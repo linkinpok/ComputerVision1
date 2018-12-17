@@ -15,7 +15,8 @@ include("Common.jl")
 #
 #---------------------------------------------------------
 function loadimage(filename)
-
+  rgb = PyPlot.imread(filename)*1.0
+  gray = Common.rgb2gray(rgb)
   return gray::Array{Float64,2}, rgb::Array{Float64,3}
 end
 
@@ -35,7 +36,13 @@ end
 #
 #---------------------------------------------------------
 function computehessian(img::Array{Float64,2},sigma::Float64,fsize::Int)
-
+  I = imfilter(img, Common.gauss2d(sigma, [fsize fsize]), "replicate")
+  deriv = [0.5 0 -0.5]
+  I_x = imfilter(I, deriv, "replicate")
+  I_y = imfilter(I, deriv', "replicate")
+  I_xx = imfilter(I_x, deriv, "replicate")
+  I_yy = imfilter(I_y, deriv', "replicate")
+  I_xy = imfilter(I_x, deriv', "replicate")
   return I_xx::Array{Float64,2},I_yy::Array{Float64,2},I_xy::Array{Float64,2}
 end
 
@@ -54,7 +61,7 @@ end
 #
 #---------------------------------------------------------
 function computecriterion(I_xx::Array{Float64,2},I_yy::Array{Float64,2},I_xy::Array{Float64,2}, sigma::Float64)
-
+  criterion = sigma^4 * (I_xx.*I_yy - I_xy.^2)
   return criterion::Array{Float64,2}
 end
 
@@ -76,7 +83,18 @@ end
 #
 #---------------------------------------------------------
 function nonmaxsupp(criterion::Array{Float64,2}, thresh::Float64)
-
+  findMax(X) = X.*(X.==maximum(X))
+  #img_filtered = Common.nlfilter(criterion,findMax,5,5,"replicate")
+  crit_max = zeros(size(criterion))
+  wsize = 5
+  # Find maxima in each window
+  for r in 1+wsize:wsize:size(crit_max,1)-wsize
+    for c in 1+wsize:wsize:size(crit_max,2)-wsize
+      crit_max[r:r+wsize-1,c:c+wsize-1] = findMax(criterion[r:r+wsize-1,c:c+wsize-1])
+    end
+  end
+  # Apply threshold
+  rows, columns = Common.findnonzero(crit_max .- thresh)
   return rows::Array{Int,1},columns::Array{Int,1}
 end
 
@@ -86,9 +104,9 @@ end
 #---------------------------------------------------------
 function problem1()
   # parameters
-  sigma = ?               # std for presmoothing image
-  fsize = ?               # filter size for smoothing
-  threshold = ?           # Corner criterion threshold
+  sigma = 4.5               # std for presmoothing image
+  fsize = 25               # filter size for smoothing
+  threshold = 0.001           # Corner criterion threshold
 
   # Load both colored and grayscale image from PNG file
   gray,rgb = loadimage("a3p1.png")
