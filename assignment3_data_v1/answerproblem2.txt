@@ -1,0 +1,7 @@
+We guess that we have problem with the implementation of function
+computehomographydistance(), since the minimal calculated distance
+is larger than 25000. In this case we have to set threshold to
+80000 to obtain some inliers.
+The consistency with multiple runs is not garateed. We think that
+it depends on the limited functionality of rand(), which is used in
+picksample().

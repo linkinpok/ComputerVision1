@@ -105,6 +105,9 @@ function showmatches(im1::Array{Float64,2},im2::Array{Float64,2},pairs::Array{In
   imshow(hcat(im1,im2),"gray")
   plot(pairs[:,1],pairs[:,2],"xy")
   plot(pairs[:,3].+size(im1,2),pairs[:,4],"xy")
+  for i in 1:size(pairs,1)
+    plot([pairs[i,1], pairs[i,3]+size(im1,2)],pairs[i,2:2:4])
+  end
   return nothing::Nothing
 end
 
@@ -216,7 +219,7 @@ function computehomographydistance(H::Array{Float64,2},points1::Array{Int,2},poi
   points1_h = Common.cart2hom(points1')   # N x 2 -> 3 x N
   points2_h = Common.cart2hom(points2')
   term1 = Common.hom2cart(H*points1_h - points2_h)  #  3 x N -> 2 x N
-  term2 = Common.hom2cart(points1_h - H^-1*points2_h)
+  term2 = Common.hom2cart(points1_h - (H^-1)*points2_h)
   d2 = [norm(term1[:,i])^2 + norm(term2[:,i])^2 for i in 1:size(term1,2)]
   d2 = Array{Float64,2}(d2')  # N x 1 -> 1 x N
   #d2 = []
@@ -241,7 +244,9 @@ end
 #
 #---------------------------------------------------------
 function findinliers(distance::Array{Float64,2},thresh::Float64)
-  indices = Array{Int,1}(findall(distance .< thresh))
+  #println(minimum(distance))
+  indices = findall(distance[1,:] .< thresh)
+  #indices = Array{Int,1}
   n = length(indices)
   return n::Int,indices::Array{Int,1}
 end
@@ -274,6 +279,7 @@ function ransac(pairs::Array{Int,2},thresh::Float64,n::Int)
     Hi = computehomography(sample1,sample2)
     d2i = computehomographydistance(H,pairs[:,1:2],pairs[:,3:4])
     ni, indices = findinliers(d2i,thresh)
+
     if i == 1 || ni > length(bestinliers)
       bestinliers = indices
       bestpairs = [sample1 sample2]
@@ -339,11 +345,12 @@ end
 # Problem 2: Image Stitching
 #---------------------------------------------------------
 function problem2()
+  close("all")
   # SIFT Parameters
   sigma = 1.4             # standard deviation for presmoothing derivatives
 
   # RANSAC Parameters
-  ransac_threshold = 50.0 # inlier threshold
+  ransac_threshold = 80000.0 # inlier threshold
   p = 0.5                 # probability that any given correspondence is valid
   k = 4                   # number of samples drawn per iteration
   z = 0.99                # total probability of success after all iterations
