@@ -174,7 +174,7 @@ function condition(points::Array{Float64,2})
   T = [1/s 0 -t[1]/s;
        0 1/s -t[2]/s;
        0 0 1]
-  U = T * points_c
+  U = T * points
   @assert size(U) == size(points)
   @assert size(T) == (3,3)
   return U::Array{Float64,2},T::Array{Float64,2}

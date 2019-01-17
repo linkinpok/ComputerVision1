@@ -19,7 +19,13 @@ include("Common.jl")
 #---------------------------------------------------------
 function condition(points::Array{Float64,2})
   # just insert your assignment3 condition method here..
-
+  points_c = points[1:end-1,:] ./ points[end:end,:]
+  s = 0.5 * maximum(norm.(points_c))
+  t = [mean(points_c[1,:]); mean(points_c[2,:])]
+  T = [1/s 0 -t[1]/s;
+       0 1/s -t[2]/s;
+       0 0 1]
+  U = T * points
   @assert size(U) == size(points)
   @assert size(T) == (3,3)
   return U::Array{Float64,2},T::Array{Float64,2}
@@ -38,7 +44,10 @@ end
 #---------------------------------------------------------
 # Enforce that the given matrix has rank 2
 function enforcerank2(A::Array{Float64,2})
-
+  eig = svd(A)
+  Dhat = Diagonal(eig.S)
+  Dhat[end,end] = 0
+  Ahat = eig.U * Dhat * eig.V'
   @assert size(Ahat) == (3,3)
   return Ahat::Array{Float64,2}
 end
@@ -57,7 +66,14 @@ end
 #---------------------------------------------------------
 # Compute the fundamental matrix for given conditioned points
 function computefundamental(p1::Array{Float64,2},p2::Array{Float64,2})
-
+  A = zeros(size(p1,2),9)
+  for i in 1:size(p1,2)
+    Ai = p1[:,i]*p2[:,i]'   # [x1 y1 1]' * [x2 y2 1] = [x1x2 x1y2 x1; y1x2 y1y2 y1; x2 y2 1]
+    A[i,:] = reshape(Ai,1,9)
+  end
+  eig = svd(A,full=true)
+  F3 = reshape(eig.V[:,9],3,3)'
+  F = enforcerank2(F3[:,:]) # F3[:,:] to avoid Adjoint input
   @assert size(F) == (3,3)
   return F::Array{Float64,2}
 end
@@ -75,7 +91,13 @@ end
 #
 #---------------------------------------------------------
 function eightpoint(p1::Array{Float64,2},p2::Array{Float64,2})
+  # conditioning
+  U1, T1 = condition(p1)
+  U2, T2 = condition(p2)
+  Fhat = computefundamental(U1,U2)
 
+  # un-conditioning
+  F = T2' * Fhat * T1
   @assert size(F) == (3,3)
   return F::Array{Float64,2}
 end
@@ -100,7 +122,14 @@ end
 #
 #---------------------------------------------------------
 function showepipolar(F::Array{Float64,2},points::Array{Float64,2},img::Array{Float64,3})
-
+  l2 = F * Common.cart2hom(points')
+  imshow(img)
+  for i in 1:size(l2,2)
+    # Source: http://www2.ece.ohio-state.edu/~aleix/MultipleImages.pdf
+    epi(x) = - (l2[1,i]*x + l2[3,i]) / l2[2,i]
+    x2 = 0:size(img,2)-1
+    plot(x2,epi.(x2))
+  end
   return nothing::Nothing
 end
 
@@ -119,7 +148,7 @@ end
 #
 #---------------------------------------------------------
 function computeresidual(p1::Array{Float64,2},p2::Array{Float64,2},F::Array{Float64,2})
-  
+  residual = [0.0 0.0]
   return residual::Array{Float64,2}
 end
 
