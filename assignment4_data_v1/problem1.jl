@@ -148,7 +148,11 @@ end
 #
 #---------------------------------------------------------
 function computeresidual(p1::Array{Float64,2},p2::Array{Float64,2},F::Array{Float64,2})
-  residual = [0.0 0.0]
+  # in case each residual error depends on distance from point to epipoline
+  # left image: residual_i = p1_i' * l1_i = p1_i' * F' * p2_i
+  # right image: residual_i = p2_i' * l2_i = p2_i' * F * p1_i
+  residual = [p1[:,i]' * F' * p2[:,i] for i in 1:size(p1,2)]'
+  residual = Float64.(residual)
   return residual::Array{Float64,2}
 end
 

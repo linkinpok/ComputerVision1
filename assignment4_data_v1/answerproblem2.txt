@@ -1,0 +1,27 @@
+0. computeDisparityEff
+5x5 window:
+sliding window by 2 pixels:
+32.526081 seconds (180.37 M allocations: 25.946 GiB, 8.38% gc time)
+disparity_SSD_eff error = 0.059053
+
+sliding window by 5 pixels:
+12.472429 seconds (74.59 M allocations: 10.774 GiB, 8.82% gc time)
+disparity_SSD_eff error = 0.065590
+
+store costs in matrix for reusage
+76.890584 seconds (712.82 M allocations: 50.923 GiB, 7.88% gc time)
+ disparity_SSD_eff error = 0.057873
+
+
+2.
+5x5 window:
+SSD = 40.614900 seconds (356.58 M allocations: 51.227 GiB, 9.45% gc time)
+NC = 52.130384 seconds (445.61 M allocations: 81.741 GiB, 10.11% gc time)
+disparity_SSD error = 0.057665
+disparity_NC error = 0.081509
+
+27x27 window:
+SSD = 192.767036 seconds (329.23 M allocations: 701.794 GiB, 23.31% gc time)
+NC = 410.777194 seconds (411.43 M allocations: 1.138 TiB, 18.06% gc time)
+disparity_SSD error = 0.061102
+disparity_NC error = 0.062735
