@@ -1,27 +1,58 @@
-0. computeDisparityEff
-5x5 window:
-sliding window by 2 pixels:
+0. improving computeDisparityEff
+We suggest two solutions for improving performance of computing disparity
+
+Solution 1: store costs of search range of each image row to reuse for next row
+76.890584 seconds (712.82 M allocations: 50.923 GiB, 7.88% gc time)
+disparity_SSD_eff error = 0.057873
+
+Solution 2: scan window by a larger step than 1 pixel to reduce the computational time and allocations
+- e.g. sliding window by 2-pixel-step:
 32.526081 seconds (180.37 M allocations: 25.946 GiB, 8.38% gc time)
 disparity_SSD_eff error = 0.059053
-
-sliding window by 5 pixels:
+- e.g. sliding window by 5-pixel-step:
 12.472429 seconds (74.59 M allocations: 10.774 GiB, 8.82% gc time)
 disparity_SSD_eff error = 0.065590
 
-store costs in matrix for reusage
-76.890584 seconds (712.82 M allocations: 50.923 GiB, 7.88% gc time)
- disparity_SSD_eff error = 0.057873
 
-
-2.
-5x5 window:
+1. Varying window size
+- 5x5 window:
 SSD = 40.614900 seconds (356.58 M allocations: 51.227 GiB, 9.45% gc time)
 NC = 52.130384 seconds (445.61 M allocations: 81.741 GiB, 10.11% gc time)
 disparity_SSD error = 0.057665
 disparity_NC error = 0.081509
 
-27x27 window:
+- 11x11 window:
+SSD = 77.974064 seconds (349.05 M allocations: 142.012 GiB, 12.36% gc time)
+NC = 127.755755 seconds (436.19 M allocations: 232.915 GiB, 11.89% gc time)
+disparity_SSD error = 0.053865
+disparity_NC error = 0.063575
+
+- 15x15 window:
+SSD = 102.952019 seconds (344.05 M allocations: 253.654 GiB, 14.66% gc time)
+NC = 181.876117 seconds (429.95 M allocations: 418.779 GiB, 12.74% gc time)
+disparity_SSD error = 0.054452
+disparity_NC error = 0.061038
+
+- 21x21 window:
+SSD = 205.385762 seconds (336.61 M allocations: 446.093 GiB, 21.63% gc time)
+NC = 389.526953 seconds (420.65 M allocations: 739.144 GiB, 18.55% gc time)
+disparity_SSD error = 0.057383
+disparity_NC error = 0.060355
+
+- 27x27 window:
 SSD = 192.767036 seconds (329.23 M allocations: 701.794 GiB, 23.31% gc time)
 NC = 410.777194 seconds (411.43 M allocations: 1.138 TiB, 18.06% gc time)
 disparity_SSD error = 0.061102
 disparity_NC error = 0.062735
+
+The lowest average EPE can be obtained by window size of 11x11 for SSD cost function
+and 21x21 for NC cost function
+
+
+2. Using a bigger window
+Pros:
+- each window contains more information for computing disparity
+- the depth map is smoother and contains less noise
+
+Cons:
+- high computational cost in time and memory allocations

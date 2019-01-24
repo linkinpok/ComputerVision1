@@ -79,7 +79,7 @@ end
 #
 #---------------------------------------------------------
 function calculateError(disparity, disparity_gt, valid_mask)
-  error_map = (disparity-disparity_gt) .* valid_mask
+  error_map = norm.(disparity-disparity_gt) .* valid_mask
   error_disparity = norm(error_map) / sum(valid_mask)
   @assert size(disparity) == size(error_map)
   return error_disparity::Float64, error_map::Array{Float64,2}
@@ -145,13 +145,14 @@ function computeDisparityEff(gray_l, gray_r, max_disp, w_size)
         patch1 = gray_l[i-r1:i+r1,j-r2:j+r2]
         #best_cost = Inf
         #best_d = max_disp
-        for k in max(1+r2,j-max_disp) : 1 : j
+        for k in max(1+r2,j-max_disp) : 1 : j # or a larger step
           patch2 = gray_r[i-r1:i+r1,k-r2:k+r2]
           cost = computeSSD(patch1, patch2)
           allcosts[j-k+1,j] = cost
           #if cost<best_cost
           #  best_cost = cost
           #  best_d = j-k
+          #end
         end
         #disparity[i,j] = best_d
         best_cost,best_d = findmin(allcosts[:,j])
@@ -162,14 +163,22 @@ function computeDisparityEff(gray_l, gray_r, max_disp, w_size)
       for j in 1+r2 : w-r2
         patch1_cut = gray_l[i-1-r1,j-r2:j+r2]
         patch1_add = gray_l[i+r1,j-r2:j+r2]
-        for k in max(1+r2,j-max_disp) : 1 : j
+        #best_cost = Inf
+        #best_d = max_disp
+        for k in max(1+r2,j-max_disp) : 1 : j   # or a larger step
           patch2_cut = gray_r[i-1-r1,k-r2:k+r2]
           patch2_add = gray_r[i+r1,k-r2:k+r2]
           allcosts[j-k+1,j] += - computeSSD(patch1_cut,patch2_cut) + computeSSD(patch1_add,patch2_add)
-          # so that only 2*w_size[2] operations are added instead of w_size[1]*w_size[2] operations
+          # => so that only 2*w_size[2] operations are added instead of w_size[1]*w_size[2] operations
+          #cost = allcosts[j-k+1,j]
+          #if cost<best_cost
+          #  best_cost = cost
+          #  best_d = j-k
+          #end
         end
         best_cost,best_d = findmin(allcosts[:,j])
         disparity[i,j] = best_d-1
+        #disparity[i,j] = best_d
       end
     end
   end
